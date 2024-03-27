@@ -20,6 +20,7 @@ include_directories(
 # Source files
 add_executable(FingerprintMatching
     src/main.cpp
+    src/openFHE_wrapper.cpp
  # add other source files here
 )
 
