@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add definitions and compiler options
 add_definitions(-DOPENFHE_VERSION=1.0.3 -DMATHBACKEND=4)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-parentheses -O3 -fopenmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-parentheses -fopenmp")
 
 # Include directories
 include_directories(
@@ -19,7 +19,7 @@ include_directories(
 
 # Source files
 add_executable(FingerprintMatching
-    src/main.cpp
+	  src/main.cpp
     src/openFHE_wrapper.cpp
  # add other source files here
 )
