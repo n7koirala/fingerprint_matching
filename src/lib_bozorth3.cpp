@@ -81,6 +81,10 @@ of the software.
 #include <stdio.h>
 #include <bozorth.h>
 
+#include <openfhe.h>
+using namespace lbcrypto;
+using namespace std;
+
 /***********************************************************************/
 void bz_comp(
 	int npoints,				/* INPUT: # of points */
@@ -395,6 +399,36 @@ static int * rtp[ ROT_SIZE_1 ];
 /* extern char * get_progname( void ); */
 /* extern char * get_probe_filename( void ); */
 /* extern char * get_gallery_filename( void ); */
+
+/* Create OpenFHE variables */
+
+CCParams<CryptoContextCKKSRNS> parameters;
+uint32_t multDepth = 15; 
+
+// ScalingTechnique rescaleTech = FIXEDAUTO;
+
+// parameters.SetSecurityLevel(HEStd_128_classic);
+parameters.SetMultiplicativeDepth(multDepth);
+parameters.SetScalingModSize(45);
+parameters.SetBatchSize(32768);
+// parameters.SetScalingTechnique(rescaleTech);
+
+CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+cc->Enable(PKE);
+cc->Enable(KEYSWITCH);
+cc->Enable(LEVELEDSHE);
+cc->Enable(ADVANCEDSHE);
+
+auto keyPair = cc->KeyGen();
+cc->EvalMultKeyGen(keyPair.secretKey);
+auto pk = keyPair.publicKey;
+
+unsigned int batchSize = cc->GetEncodingParams()->GetBatchSize();
+
+std::cout << "CKKS default parameters: " << parameters << std::endl;
+std::cout << std::endl;
+std::cout << std::endl;
+
 
 #define CT_SIZE 262144 /* 512*512 since that'll be max size for pair tables */ 
 static int he_cmp[ CT_SIZE ] = {0};
