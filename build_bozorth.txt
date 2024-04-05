@@ -1,0 +1,51 @@
+-- make[3]: Entering directory '/home/jsteve22/rebuilding_bozorth/bozorth3/src/lib/bozorth3' -- 
+/usr/bin/gcc 
+	-O2 
+	-w 
+	-ansi 
+	-D_POSIX_SOURCE 
+	-D__NBISLE__    
+	-fPIC  
+	-I/home/jsteve22/rebuilding_bozorth/bozorth3/include 
+	-I/home/jsteve22/rebuilding_bozorth/exports/include 
+	-c 
+	-o 
+	/home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bozorth3.o 
+	bozorth3.c
+
+/usr/bin/gcc -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__    -fPIC  -I/home/jsteve22/rebuilding_bozorth/bozorth3/include -I/home/jsteve22/rebuilding_bozorth/exports/include -c -o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bz_alloc.o bz_alloc.c
+/usr/bin/gcc -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__    -fPIC  -I/home/jsteve22/rebuilding_bozorth/bozorth3/include -I/home/jsteve22/rebuilding_bozorth/exports/include -c -o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bz_drvrs.o bz_drvrs.c
+/usr/bin/gcc -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__    -fPIC  -I/home/jsteve22/rebuilding_bozorth/bozorth3/include -I/home/jsteve22/rebuilding_bozorth/exports/include -c -o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bz_gbls.o bz_gbls.c
+/usr/bin/gcc -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__    -fPIC  -I/home/jsteve22/rebuilding_bozorth/bozorth3/include -I/home/jsteve22/rebuilding_bozorth/exports/include -c -o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bz_io.o bz_io.c
+/usr/bin/gcc -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__    -fPIC  -I/home/jsteve22/rebuilding_bozorth/bozorth3/include -I/home/jsteve22/rebuilding_bozorth/exports/include -c -o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bz_sort.o bz_sort.c
+ar ru /home/jsteve22/rebuilding_bozorth/bozorth3/lib/libbozorth3.a /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bozorth3.o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bz_alloc.o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bz_drvrs.o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bz_gbls.o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bz_io.o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/lib/bozorth3/bz_sort.o
+
+
+make[3]: Entering directory '/home/jsteve22/rebuilding_bozorth/bozorth3/src/bin/bozorth3'
+/usr/bin/gcc -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__    -fPIC  -I/home/jsteve22/rebuilding_bozorth/bozorth3/include -I/home/jsteve22/rebuilding_bozorth/exports/include -c -o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/bin/bozorth3/bozorth3.o bozorth3.c
+/usr/bin/gcc -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__    -fPIC  -I/home/jsteve22/rebuilding_bozorth/bozorth3/include -I/home/jsteve22/rebuilding_bozorth/exports/include -c -o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/bin/bozorth3/usage.o usage.c
+/usr/bin/gcc -fPIC /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/bin/bozorth3/bozorth3.o /home/jsteve22/rebuilding_bozorth/bozorth3/obj/src/bin/bozorth3/usage.o /home/jsteve22/rebuilding_bozorth/exports/lib/libbozorth3.a  -lm -o /home/jsteve22/rebuilding_bozorth/bozorth3/bin/bozorth3
+
+
+MAKEFILE
+
+all: lib_bozorth3 bozorth3
+
+lib_bozorth3:
+	# gcc -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__ -fPIC -I/home/jsteve22/rebuilding_bozorth/bozorth3/include -I/home/jsteve22/rebuilding_bozorth/exports/include -c -o obj/lib_bozorth3.o src/lib_bozorth3.c
+	g++ -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__ -fpermissive -fPIC -I./include -c -o obj/lib_bozorth3.o src/lib_bozorth3.cpp
+	g++ -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__ -fpermissive -fPIC -I./include -c -o obj/lib_bz_alloc.o src/lib_bz_alloc.cpp
+	g++ -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__ -fpermissive -fPIC -I./include -c -o obj/lib_bz_drvrs.o src/lib_bz_drvrs.cpp
+	g++ -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__ -fpermissive -fPIC -I./include -c -o obj/lib_bz_gbls.o src/lib_bz_gbls.cpp
+	g++ -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__ -fpermissive -fPIC -I./include -c -o obj/lib_bz_io.o src/lib_bz_io.cpp
+	g++ -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__ -fpermissive -fPIC -I./include -c -o obj/lib_bz_sort.o src/lib_bz_sort.cpp
+	ar r obj/libbozorth3.a obj/lib_bozorth3.o obj/lib_bz_alloc.o obj/lib_bz_drvrs.o obj/lib_bz_gbls.o obj/lib_bz_io.o obj/lib_bz_sort.o 
+
+bozorth3:
+	g++ -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__  -fpermissive -fPIC -I./include -c -o obj/bozorth3.o src/bozorth3.cpp
+	g++ -O2 -w -ansi -D_POSIX_SOURCE -D__NBISLE__  -fpermissive -fPIC -I./include -c -o obj/usage.o src/usage.cpp
+	g++ -fPIC obj/bozorth3.o obj/usage.o obj/libbozorth3.a -lm -o bin/bozorth3
+
+clean:
+	rm -rf obj/*.o obj/*.a
+
