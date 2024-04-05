@@ -1,19 +1,19 @@
 /*******************************************************************************
 
-License: 
+License:
 This software and/or related materials was developed at the National Institute
 of Standards and Technology (NIST) by employees of the Federal Government
 in the course of their official duties. Pursuant to title 17 Section 105
 of the United States Code, this software is not subject to copyright
-protection and is in the public domain. 
+protection and is in the public domain.
 
 This software and/or related materials have been determined to be not subject
 to the EAR (see Part 734.3 of the EAR for exact details) because it is
 a publicly available technology and software, and is freely distributed
-to any interested party with no licensing requirements.  Therefore, it is 
+to any interested party with no licensing requirements.  Therefore, it is
 permissible to distribute this software as a free download from the internet.
 
-Disclaimer: 
+Disclaimer:
 This software and/or related materials was developed to promote biometric
 standards and biometric technology testing for the Federal Government
 in accordance with the USA PATRIOT Act and the Enhanced Border Security
@@ -63,49 +63,37 @@ of the software.
 
 ***********************************************************************/
 
+#include <bozorth.h>
 #include <stdio.h>
 #include <string.h>
-#include <bozorth.h>
-
 
 /***********************************************************************/
-char * malloc_or_exit( int nbytes, const char * what )
-{
-char * p;
+char *malloc_or_exit(int nbytes, const char *what) {
+  char *p;
 
-/* These are now externally defined in bozorth.h */
-/* extern FILE * errorfp; */
-/* extern char * get_progname( void ); */
+  /* These are now externally defined in bozorth.h */
+  /* extern FILE * errorfp; */
+  /* extern char * get_progname( void ); */
 
-
-p = malloc( (size_t) nbytes );
-if ( p == CNULL ) {
-	fprintf( errorfp, "%s: ERROR: malloc() of %d bytes for %s failed: %s\n",
-						get_progname(),
-						nbytes,
-						what,
-						strerror( errno )
-						);
-	exit(1);
-}
-return p;
+  p = malloc((size_t)nbytes);
+  if (p == CNULL) {
+    fprintf(errorfp, "%s: ERROR: malloc() of %d bytes for %s failed: %s\n",
+            get_progname(), nbytes, what, strerror(errno));
+    exit(1);
+  }
+  return p;
 }
 
 /***********************************************************************/
 /* returns CNULL on error */
-char * malloc_or_return_error( int nbytes, const char * what )
-{
-char * p;
+char *malloc_or_return_error(int nbytes, const char *what) {
+  char *p;
 
-p = malloc( (size_t) nbytes );
-if ( p == CNULL ) {
-	fprintf( errorfp, "%s: ERROR: malloc() of %d bytes for %s failed: %s\n",
-						get_progname(),
-						nbytes,
-						what,
-						strerror( errno )
-						);
-	return(CNULL);
-}
-return p;
+  p = malloc((size_t)nbytes);
+  if (p == CNULL) {
+    fprintf(errorfp, "%s: ERROR: malloc() of %d bytes for %s failed: %s\n",
+            get_progname(), nbytes, what, strerror(errno));
+    return (CNULL);
+  }
+  return p;
 }
