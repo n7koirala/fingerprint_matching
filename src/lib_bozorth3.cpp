@@ -82,6 +82,7 @@ of the software.
 #include <stdio.h>
 
 #include <openfhe.h>
+#include <vector>
 using namespace lbcrypto;
 using namespace std;
 
@@ -283,7 +284,7 @@ void bz_find(int *xlim, /* INPUT:  number of pointwise comparisons in table */
 /* limit the size to MAX_PAIR_TABLE_SIZE */
 /* this will limit the midpoint to 500, limits  */
 /* the pair table size to FDD=500 in ./bz_drvrs/bozorth_probe_init()  */
-#define MAX_PAIR_TABLE_SIZE 500
+#define MAX_PAIR_TABLE_SIZE 128
   if (*xlim > MAX_PAIR_TABLE_SIZE)
     *xlim = MAX_PAIR_TABLE_SIZE;
 }
@@ -344,12 +345,13 @@ int bz_match(
   register int *rotptr;
 
   /*
-          int probe_ptrlist_len,		INPUT:  pruned length of Subject's
+          int probe_ptrlist_len,		INPUT:  pruned length of
+     Subject's
      pointer list int gallery_ptrlist_len		INPUT:  pruned length of
      On-File Record's pointer list Print out the probe and gallery sizes to see
      how big they are typically. (Assumed 200)
   */
-  fprintf(stdout, "In bz_match(): \n");
+  /* fprintf(stdout, "In bz_match(): \n"); */
   /* fprintf(stdout, "\tprob_ptrlist_len: %d\n", probe_ptrlist_len); */
   /* fprintf(stdout, "\tgallery_ptrlist_len: %d\n", gallery_ptrlist_len); */
   /* The table sizes are limited to be 500 - changed bz_find (and bz_probe_init)
@@ -397,36 +399,44 @@ int bz_match(
 
   unsigned int batchSize = cc->GetEncodingParams()->GetBatchSize();
 
+#if false
   std::cout << "CKKS default parameters: " << parameters << std::endl;
   std::cout << std::endl;
   std::cout << std::endl;
+#endif
 
-#define CT_SIZE 262144 /* 512*512 since that'll be max size for pair tables */
+#define CT_SIZE 16384 /* 128*128 since that'll be max size for pair tables */
   static int he_cmp[CT_SIZE] = {0};
   int s_d_max = *scolpt[0];
   int f_d_max = *fcolpt[0];
 
-  /* Create vectors for probe and gallery fingerprints */
-  static float ss_dist[CT_SIZE] = {0};
-  static float ss_dsqr[CT_SIZE] = {0};
-  static float ss_b1[CT_SIZE] = {0};
-  static float ss_b2[CT_SIZE] = {0};
-  static int ss_global[CT_SIZE] = {0};
-  static int ss_n[CT_SIZE] = {0};
+#if false
+	std::cout << "probe_ptrlist_len: " << probe_ptrlist_len << std::endl;
+	std::cout << "gallery_ptrlist_len: " << gallery_ptrlist_len << std::endl;
+#endif
 
-  static float ff_dist[CT_SIZE] = {0};
-  static float ff_dsqr[CT_SIZE] = {0};
-  static float ff_b1[CT_SIZE] = {0};
-  static float ff_b2[CT_SIZE] = {0};
-  static int ff_global[CT_SIZE] = {0};
-  static int ff_b[CT_SIZE] = {0};
+  /* Create vectors for probe and gallery fingerprints */
+  // static float ss_dist[CT_SIZE] = {0};
+  std::vector<double> ss_dist(CT_SIZE, 0);
+  std::vector<double> ss_dsqr(CT_SIZE, 0);
+  std::vector<double> ss_b1(CT_SIZE, 0);
+  std::vector<double> ss_b2(CT_SIZE, 0);
+  std::vector<double> ss_global(CT_SIZE, 0);
+  std::vector<double> ss_n(CT_SIZE, 0);
+
+  std::vector<double> ff_dist(CT_SIZE, 0);
+  std::vector<double> ff_dsqr(CT_SIZE, 0);
+  std::vector<double> ff_b1(CT_SIZE, 0);
+  std::vector<double> ff_b2(CT_SIZE, 0);
+  std::vector<double> ff_global(CT_SIZE, 0);
+  std::vector<double> ff_b(CT_SIZE, 0);
 
   /* Create vectors to store results */
 
-  static float rr_dist[CT_SIZE] = {0};
-  static float rr_b1[CT_SIZE] = {0};
-  static float rr_b2[CT_SIZE] = {0};
-  static int rr_global[CT_SIZE] = {0};
+  std::vector<double> rr_dist(CT_SIZE, 0);
+  std::vector<double> rr_b1(CT_SIZE, 0);
+  std::vector<double> rr_b2(CT_SIZE, 0);
+  std::vector<double> rr_global(CT_SIZE, 0);
 
   /* pre-process vectors for subjet and On-File */
   for (k = 1; k < probe_ptrlist_len; k++) {
@@ -481,14 +491,90 @@ int bz_match(
   float x;
   float y;
 
+  /* make packed plaintexts */
+  Plaintext ps_dist = cc->MakeCKKSPackedPlaintext(ss_dist);
+  Plaintext ps_dsqr = cc->MakeCKKSPackedPlaintext(ss_dsqr);
+  Plaintext pf_dist = cc->MakeCKKSPackedPlaintext(ff_dist);
+  Plaintext pf_dsqr = cc->MakeCKKSPackedPlaintext(ff_dsqr);
+
+  Plaintext ps_b1 = cc->MakeCKKSPackedPlaintext(ss_b1);
+  Plaintext ps_b2 = cc->MakeCKKSPackedPlaintext(ss_b2);
+  Plaintext pf_b1 = cc->MakeCKKSPackedPlaintext(ff_b1);
+  Plaintext pf_b2 = cc->MakeCKKSPackedPlaintext(ff_b2);
+
+  /* Encrypt distance and distance squared */
+  auto cs_dist = cc->Encrypt(pk, ps_dist);
+  auto cs_dsqr = cc->Encrypt(pk, ps_dsqr);
+  auto cf_dist = cc->Encrypt(pk, pf_dist);
+  auto cf_dsqr = cc->Encrypt(pk, pf_dsqr);
+
+  auto cs_b1 = cc->Encrypt(pk, ps_b1);
+  auto cs_b2 = cc->Encrypt(pk, ps_b2);
+  auto cf_b1 = cc->Encrypt(pk, pf_b1);
+  auto cf_b2 = cc->Encrypt(pk, pf_b2);
+
+  /* compute homomophic ops */
+  /* dist */
+  auto c1 = cc->EvalMult(cs_dist, cf_dist);
+  auto c1Scaled = cc->EvalMult(c1, 2.02);
+  auto c2 = cc->EvalAdd(cs_dsqr, cf_dsqr);
+  auto c2Scaled = cc->EvalMult(c2, 0.99);
+  auto cdist = cc->EvalSub(c2Scaled, c1Scaled);
+
+  /* angles */
+  c1 = cc->EvalSub(cs_b1, cf_b1);
+  c1Scaled = cc->EvalMult(c1, 0.091);
+  c2 = cc->EvalMult(c1Scaled, c1Scaled);
+  c2Scaled = cc->EvalMult(c2, 1.5);
+  c1 = cc->EvalSub(c2Scaled, 0.75);
+  // c2 = cc->EvalMult(c1, c1);
+  auto cb1 = cc->EvalMult(c1, c1);
+
+  c1 = cc->EvalSub(cs_b2, cf_b2);
+  c1Scaled = cc->EvalMult(c1, 0.091);
+  c2 = cc->EvalMult(c1Scaled, c1Scaled);
+  c2Scaled = cc->EvalMult(c2, 1.5);
+  c1 = cc->EvalSub(c2Scaled, 0.75);
+  // c2 = cc->EvalMult(c1, c1);
+  auto cb2 = cc->EvalMult(c1, c1);
+
+  /* Decrypt results */
+  Plaintext dist_result;
+  cc->Decrypt(keyPair.secretKey, cdist, &dist_result);
+  dist_result->SetLength(CT_SIZE);
+  rr_dist = dist_result->GetRealPackedValue();
+
+  Plaintext b1_result;
+  cc->Decrypt(keyPair.secretKey, cb1, &b1_result);
+  b1_result->SetLength(CT_SIZE);
+  rr_b1 = b1_result->GetRealPackedValue();
+
+  Plaintext b2_result;
+  cc->Decrypt(keyPair.secretKey, cb2, &b2_result);
+  b2_result->SetLength(CT_SIZE);
+  rr_b2 = b2_result->GetRealPackedValue();
+
+  std::cout.precision(8);
+
   for (k = 0; k < CT_SIZE; k++) {
 
     /* Calculate distance homomorphically */
+#if false
     x = 2.02F * (ss_dist[k] * ff_dist[k]); /* Depth 1 */
     y = 0.99F * (ss_dsqr[k] + ff_dsqr[k]);
 
+
+		if (abs(rr_dist[k] -y + x) > 100) {
+			std::cout << "rr_dist[k]: " << rr_dist[k] << std::endl;
+			std::cout << "y: " << y << std::endl;
+			std::cout << "x: " << x << std::endl;
+			std::cout << std::endl;
+		}
+		// std::cout << rr_dist[k] - y + x << std::endl;
+
     rr_dist[k] = y - x;
 
+#endif
     /* Calculate angles difference homomorphically */
     x = ss_b1[k] - ff_b1[k];
     x = x * 0.091; /* normalize by 1/11 */
@@ -498,6 +584,26 @@ int bz_match(
 
     x = SQUARED(y); /* depth 2 */
     y = SQUARED(x); /* depth 3 */
+
+    // rr_b1[k] = y;
+#if false
+		if ((rr_b1[k] > 1) != (y > 1)) {
+			std::cout << "rr_b1: " << rr_b1[k] << std::endl;
+			std::cout << "y: " << y << std::endl;
+			std::cout << std::endl;
+		}
+#endif
+
+    /* Calculate angles difference homomorphically */
+    x = ss_b2[k] - ff_b2[k];
+    x = x * 0.091; /* normalize by 1/11 */
+
+    y = SQUARED(x); /* depth 1 */
+    y = 1.5F * y - 0.75;
+
+    x = SQUARED(y); /* depth 2 */
+    y = SQUARED(x); /* depth 3 */
+                    // rr_b2[k] = y;
 
     /* Calculate global angles */
     x = ss_global[k] - ff_global[k];
@@ -516,77 +622,6 @@ int bz_match(
 
     he_cmp[k] = 1;
   }
-
-#if false
-for (k = 1; k < probe_ptrlist_len; k++) {
-	ss = scolpt[k-1]; /* get subject's stats pointer */
-	for (j = 1; j < gallery_ptrlist_len; j++) {
-		ff = fcolpt[j-1]; /* get On-File's stats pointer */
-		dz = *ff - *ss; /* calcaulte the difference between distance_s and distance_f */
-		fi = ( 2.0F * TK ) * ( *ff + *ss );
-
-
-		/* find the max size of subject and on file tables (i do not remember tho) */
-		if (*ff > f_d_max) {
-			f_d_max = *ff;
-		}
-
-		if (*ss > s_d_max) {
-			s_d_max = *ss;
-		}
-
-		/*
-		if ((j == 1) && (k==2)) {  / Print out what ss[3], ss[4], ff[3], and ff[4] print /
-			fprintf(stdout, "ss[3] = %d\n", ss[3]);
-			fprintf(stdout, "ss[4] = %d\n", ss[4]);
-			fprintf(stdout, "ff[3] = %d\n", ff[3]);
-			fprintf(stdout, "ff[4] = %d\n", ff[4]);
-		}
-		*/
-
-		float sff = SQUARED(*ff);
-		float sss = SQUARED(*ss);
-		float random_float = 0.7; /* a random float that the server could select */
-		/* if ( SQUARED(dz) > SQUARED(fi) ) { */
-		if ( random_float * ((0.99F*(sff+sss) )-(2.02F*(*ff)*(*ss))) > 0 ) {
-			/* set equal to false */
-			he_cmp[ ((k-1)*gallery_ptrlist_len) + j-1 ] = 0; 
-			continue;
-		}
-
-		/* get the angles of the subject and on file stats */
-		for ( i = 1; i < 3; i++ ) {
-			float dz_squared;
-
-			dz = *(ss+i) - *(ff+i);
-			/* dz_squared = SQUARED(dz);  */
-
-			/* only compute if |dz| < 11 */
-			dz_squared = dz * 0.091; /* normalize by 1/11 */
-			dz_squared = SQUARED(dz_squared); /* depth 1 */
-			dz_squared = 1.5*dz_squared - 0.75;
-			dz_squared = SQUARED(dz_squared); /* depth 2 */
-			dz_squared = SQUARED(dz_squared); /* depth 3 */
-			if (dz_squared > 1)
-				break; 
-
-			/* TXS = 121 = 11^2; CTXS = 121801 = 349^2 */
-			/* if ( dz_squared > TXS && dz_squared < CTXS )  */
-				/* break; */
-			/* only accept pairs with angles that are less that 11 degrees apart  */
-			/* angle < 11 or angle > 349 passes the check */
-		}
-
-		/* skip if either angle is out of the range */
-		if ( i < 3 ) {
-			he_cmp[ ((k-1)*gallery_ptrlist_len) + j-1 ] = 0; /* set equal to false */
-			continue;
-		}
-
-		he_cmp[ ((k-1)*gallery_ptrlist_len) + j-1 ] = 1; /* set equal to true */
-	}
-}
-#endif
 
   /*
   fprintf(stdout, "In bz_match()\n");
@@ -631,23 +666,25 @@ for (k = 1; k < probe_ptrlist_len; k++) {
       /* } */
       /* passed the distance test */
 
+#if false
       /* get the angles of the subject and on file stats */
-      /* for ( i = 1; i < 3; i++ ) { */
-      /* float dz_squared; */
+      for ( i = 1; i < 3; i++ ) { 
+				float dz_squared; 
 
-      /* dz = *(ss+i) - *(ff+i); */
-      /* dz_squared = SQUARED(dz);  */
+				dz = *(ss+i) - *(ff+i); 
+				dz_squared = SQUARED(dz);  
 
-      /* TXS = 121 = 11^2; CTXS = 121801 = 349^2 */
-      /* if ( dz_squared > TXS && dz_squared < CTXS )  */
-      /* break; */
-      /* only accept pairs with angles that are less that 11 degrees apart  */
-      /* angle < 11 or angle > 349 passes the check */
-      /* } */
+				/* TXS = 121 = 11^2; CTXS = 121801 = 349^2 */
+				if ( dz_squared > TXS && dz_squared < CTXS )  
+					break; 
+				/* only accept pairs with angles that are less that 11 degrees apart  */
+				/* angle < 11 or angle > 349 passes the check */
+      } 
 
       /* skip if either angle is out of the range */
-      /* if ( i < 3 ) */
-      /* continue; */
+      if ( i < 3 ) 
+      	continue;
+#endif
 
       /* Everything above this comment gives the code for comparison */
 

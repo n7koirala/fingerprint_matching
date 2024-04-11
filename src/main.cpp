@@ -1,5 +1,6 @@
 #include <iostream>
 #include <openfhe.h>
+#include <vector>
 
 using namespace lbcrypto;
 using namespace std;
@@ -46,6 +47,25 @@ int main() {
   std::cout << "multiplicative depth: " << parameters.GetMultiplicativeDepth()
             << std::endl;
   std::cout << "Noise level: " << parameters.GetNoiseEstimate() << std::endl;
+
+  std::vector<double> x = {0.25, 0.5, 0.75, 1.0};
+
+  Plaintext ptxt = cc->MakeCKKSPackedPlaintext(x);
+
+  auto c = cc->Encrypt(pk, ptxt);
+  auto cMULT = cc->EvalMult(c, c);
+
+  Plaintext result;
+
+  std::cout.precision(8);
+  cc->Decrypt(keyPair.secretKey, cMULT, &result);
+
+  result->SetLength(4);
+  std::cout << "Results " << result << std::endl;
+
+  std::vector<double> res = result->GetRealPackedValue();
+
+  std::cout << "Res: " << res << std::endl;
 
   return 0;
 }
