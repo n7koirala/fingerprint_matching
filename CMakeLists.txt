@@ -20,16 +20,16 @@ include_directories(
 
 # Source files
 add_executable(FingerprintMatching
-# src/main.cpp
-    src/openFHE_wrapper.cpp
-    src/lib_bozorth3.cpp
-    src/lib_bz_alloc.cpp
-    src/lib_bz_drvrs.cpp
-    src/lib_bz_gbls.cpp
-    src/lib_bz_io.cpp
-    src/lib_bz_sort.cpp
-    src/usage.cpp
-    src/bozorth3.cpp
+		# src/main.cpp
+		src/openFHE_wrapper.cpp
+		src/lib_bozorth3.cpp
+		src/lib_bz_alloc.cpp
+		src/lib_bz_drvrs.cpp
+		src/lib_bz_gbls.cpp
+		src/lib_bz_io.cpp
+		src/lib_bz_sort.cpp
+		src/usage.cpp
+		src/bozorth3.cpp
  # add other source files here
 )
 
