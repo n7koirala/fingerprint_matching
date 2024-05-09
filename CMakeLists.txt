@@ -15,6 +15,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     /usr/local/include/openfhe/core
     /usr/local/include/openfhe/pke
+    /usr/local/include/openfhe/binfhe
     /usr/local/include/openfhe/
 )
 
