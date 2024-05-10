@@ -438,10 +438,22 @@ int bz_match(
   std::vector<double> rr_b2(CT_SIZE, 0);
   std::vector<double> rr_global(CT_SIZE, 0);
 
+  int start_index, end_index;
+  int window_length = 8;
+
   /* pre-process vectors for subjet and On-File */
   for (k = 1; k < probe_ptrlist_len; k++) {
     ss = scolpt[k - 1];
-    for (j = 1; j < gallery_ptrlist_len; j++) {
+
+    /* limit table to be 128*16 instead of 128*128 */
+    start_index = k-(window_length>>1);
+    end_index = k+(window_length>>1);
+
+    if (start_index < 1) start_index = 1;
+    if (end_index > gallery_ptrlist_len) end_index = gallery_ptrlist_len;
+
+
+    for (j = start_index; j < end_index; j++) {
       ff = fcolpt[j - 1];
 
       if (*ff > f_d_max) {
@@ -487,6 +499,12 @@ int bz_match(
       }
     }
   }
+
+  std::vector<double> ss_print(ss_dist.begin(), ss_dist.begin()+(128*8));
+  std::vector<double> ff_print(ff_dist.begin(), ff_dist.begin()+(128*8));
+  
+  std::cout << ss_print << std::endl << std::endl;
+  std::cout << ff_print << std::endl;
 
   float x;
   float y;
