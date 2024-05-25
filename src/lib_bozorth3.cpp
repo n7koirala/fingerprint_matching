@@ -438,6 +438,8 @@ int bz_match(
   std::vector<double> rr_b2(CT_SIZE, 0);
   std::vector<double> rr_global(CT_SIZE, 0);
 
+  std::vector<double> test_print(probe_ptrlist_len, 0);
+
   int start_index, end_index;
   int window_length = 8;
 
@@ -456,6 +458,8 @@ int bz_match(
     for (j = start_index; j < end_index; j++) {
       ff = fcolpt[j - 1];
 
+      test_print[j-1] = (double)ff[0];
+
       if (*ff > f_d_max) {
         f_d_max = ff[3];
       }
@@ -464,47 +468,53 @@ int bz_match(
         s_d_max = ss[3];
       }
 
-      ss_dist[((k - 1) * gallery_ptrlist_len) + j - 1] =
+      window_length = 8;
+
+      ss_dist[((k - 1) * window_length) + j - 1] =
           (float)ss[0]; /* subject distance */
-      ss_dsqr[((k - 1) * gallery_ptrlist_len) + j - 1] =
+      ss_dsqr[((k - 1) * window_length) + j - 1] =
           (float)SQUARED(ss[0]); /* subject distance */
-      ss_b1[((k - 1) * gallery_ptrlist_len) + j - 1] =
+      ss_b1[((k - 1) * window_length) + j - 1] =
           (float)ss[1]; /* subject b1 */
-      ss_b2[((k - 1) * gallery_ptrlist_len) + j - 1] =
+      ss_b2[((k - 1) * window_length) + j - 1] =
           (float)ss[2]; /* subject b2 */
 
       if (ss[5] >= 220) {
-        ss_global[((k - 1) * gallery_ptrlist_len) + j - 1] = ss[5] - 580;
-        ss_n[((k - 1) * gallery_ptrlist_len) + j - 1] = 1;
+        ss_global[((k - 1) * window_length) + j - 1] = ss[5] - 580;
+        ss_n[((k - 1) * window_length) + j - 1] = 1;
       } else {
-        ss_global[((k - 1) * gallery_ptrlist_len) + j - 1] = ss[5];
-        ss_n[((k - 1) * gallery_ptrlist_len) + j - 1] = 0;
+        ss_global[((k - 1) * window_length) + j - 1] = ss[5];
+        ss_n[((k - 1) * window_length) + j - 1] = 0;
       }
 
-      ff_dist[((k - 1) * gallery_ptrlist_len) + j - 1] =
+      ff_dist[((k - 1) * window_length) + j - 1] =
           (float)ff[0]; /* on file distance */
-      ff_dsqr[((k - 1) * gallery_ptrlist_len) + j - 1] =
+      ff_dsqr[((k - 1) * window_length) + j - 1] =
           (float)SQUARED(ff[0]); /* on file distance */
-      ff_b1[((k - 1) * gallery_ptrlist_len) + j - 1] =
+      ff_b1[((k - 1) * window_length) + j - 1] =
           (float)ff[1]; /* on file b1 */
-      ff_b2[((k - 1) * gallery_ptrlist_len) + j - 1] =
+      ff_b2[((k - 1) * window_length) + j - 1] =
           (float)ff[2]; /* on file b2 */
 
       if (ff[5] >= 220) {
-        ff_global[((k - 1) * gallery_ptrlist_len) + j - 1] = ff[5] - 580;
-        ff_b[((k - 1) * gallery_ptrlist_len) + j - 1] = 1;
+        ff_global[((k - 1) * window_length) + j - 1] = ff[5] - 580;
+        ff_b[((k - 1) * window_length) + j - 1] = 1;
       } else {
-        ff_global[((k - 1) * gallery_ptrlist_len) + j - 1] = ff[5];
-        ff_b[((k - 1) * gallery_ptrlist_len) + j - 1] = 0;
+        ff_global[((k - 1) * window_length) + j - 1] = ff[5];
+        ff_b[((k - 1) * window_length) + j - 1] = 0;
       }
+      window_length = 8;
     }
   }
 
-  std::vector<double> ss_print(ss_dist.begin(), ss_dist.begin()+(128*8));
-  std::vector<double> ff_print(ff_dist.begin(), ff_dist.begin()+(128*8));
+#if false
+  std::vector<double> ss_print(ss_dist.begin(), ss_dist.begin()+(128*10));
+  std::vector<double> ff_print(ff_dist.begin(), ff_dist.begin()+(128*10));
   
   std::cout << ss_print << std::endl << std::endl;
-  std::cout << ff_print << std::endl;
+  std::cout << ff_print << std::endl << std::endl;
+  std::cout << test_print << std::endl << std::endl;
+#endif
 
   float x;
   float y;
@@ -522,9 +532,11 @@ int bz_match(
 
   /* Encrypt distance and distance squared */
   auto cs_dist = cc->Encrypt(pk, ps_dist);
-  auto cs_dsqr = cc->Encrypt(pk, ps_dsqr);
+  /* auto cs_dsqr = cc->Encrypt(pk, ps_dsqr); */
+  auto cs_dsqr = cc->EvalSquare(cs_dist);
   auto cf_dist = cc->Encrypt(pk, pf_dist);
-  auto cf_dsqr = cc->Encrypt(pk, pf_dsqr);
+  /* auto cf_dsqr = cc->Encrypt(pk, pf_dsqr); */
+  auto cf_dsqr = cc->EvalSquare(cf_dist);
 
   auto cs_b1 = cc->Encrypt(pk, ps_b1);
   auto cs_b2 = cc->Encrypt(pk, ps_b2);
@@ -628,24 +640,22 @@ int bz_match(
     rr_global[k] = IANGLE180(x);
 
     /* check conditionals after decryption */
-    if (ss_dist[k] == 0)
+    if (ss_dist[k] == 0) {
       continue;
+    }
 
-    if (rr_dist[k] > 0)
+    if (rr_dist[k] > 0) {
       continue;
-    if (rr_b1[k] > 1)
+    }
+    if (rr_b1[k] > 1) {
       continue;
-    if (rr_b2[k] > 1)
+    }
+    if (rr_b2[k] > 1) {
       continue;
+    }
 
     he_cmp[k] = 1;
   }
-
-  /*
-  fprintf(stdout, "In bz_match()\n");
-  fprintf(stdout, "\tmax s dist = %d\n", s_d_max);
-  fprintf(stdout, "\tmax f dist = %d\n", f_d_max);
-  */
 
   st = 1;
   edge_pair_index = 0;
@@ -707,7 +717,7 @@ int bz_match(
       /* Everything above this comment gives the code for comparison */
 
       /* implement skipping when the conditions are not met */
-      if (he_cmp[((k - 1) * gallery_ptrlist_len) + j - 1] == 0)
+      if (he_cmp[((k - 1) * window_length) + j - 1] == 0)
         continue;
 
 #if false
@@ -738,9 +748,9 @@ int bz_match(
 		if ( n != b ) {
 #endif
 
-      if (ss_n[((k - 1) * gallery_ptrlist_len) + j - 1] !=
-          ff_b[((k - 1) * gallery_ptrlist_len) + j - 1]) {
-        p1 = rr_global[((k - 1) * gallery_ptrlist_len) + j - 1];
+      if (ss_n[((k - 1) * window_length) + j - 1] !=
+          ff_b[((k - 1) * window_length) + j - 1]) {
+        p1 = rr_global[((k - 1) * window_length) + j - 1];
 
         *rotptr++ = p1;
         *rotptr++ = *(ss + 3);
@@ -749,7 +759,7 @@ int bz_match(
         *rotptr++ = *(ff + 4);
         *rotptr++ = *(ff + 3);
       } else {
-        p1 = rr_global[((k - 1) * gallery_ptrlist_len) + j - 1];
+        p1 = rr_global[((k - 1) * window_length) + j - 1];
 
         *rotptr++ = p1;
         *rotptr++ = *(ss + 3);
