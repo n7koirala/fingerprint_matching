@@ -418,14 +418,12 @@ int bz_match(
   /* Create vectors for probe and gallery fingerprints */
   // static float ss_dist[CT_SIZE] = {0};
   std::vector<double> ss_dist(CT_SIZE, 0);
-  std::vector<double> ss_dsqr(CT_SIZE, 0);
   std::vector<double> ss_b1(CT_SIZE, 0);
   std::vector<double> ss_b2(CT_SIZE, 0);
   std::vector<double> ss_global(CT_SIZE, 0);
   std::vector<double> ss_n(CT_SIZE, 0);
 
   std::vector<double> ff_dist(CT_SIZE, 0);
-  std::vector<double> ff_dsqr(CT_SIZE, 0);
   std::vector<double> ff_b1(CT_SIZE, 0);
   std::vector<double> ff_b2(CT_SIZE, 0);
   std::vector<double> ff_global(CT_SIZE, 0);
@@ -472,7 +470,6 @@ int bz_match(
 
       ss_dist[((k - 1) * window_length) + j - 1] =
           (float)ss[0]; /* subject distance */
-      ss_dsqr[((k - 1) * window_length) + j - 1] =
           (float)SQUARED(ss[0]); /* subject distance */
       ss_b1[((k - 1) * window_length) + j - 1] =
           (float)ss[1]; /* subject b1 */
@@ -489,7 +486,6 @@ int bz_match(
 
       ff_dist[((k - 1) * window_length) + j - 1] =
           (float)ff[0]; /* on file distance */
-      ff_dsqr[((k - 1) * window_length) + j - 1] =
           (float)SQUARED(ff[0]); /* on file distance */
       ff_b1[((k - 1) * window_length) + j - 1] =
           (float)ff[1]; /* on file b1 */
@@ -521,9 +517,7 @@ int bz_match(
 
   /* make packed plaintexts */
   Plaintext ps_dist = cc->MakeCKKSPackedPlaintext(ss_dist);
-  Plaintext ps_dsqr = cc->MakeCKKSPackedPlaintext(ss_dsqr);
   Plaintext pf_dist = cc->MakeCKKSPackedPlaintext(ff_dist);
-  Plaintext pf_dsqr = cc->MakeCKKSPackedPlaintext(ff_dsqr);
 
   Plaintext ps_b1 = cc->MakeCKKSPackedPlaintext(ss_b1);
   Plaintext ps_b2 = cc->MakeCKKSPackedPlaintext(ss_b2);
@@ -532,10 +526,8 @@ int bz_match(
 
   /* Encrypt distance and distance squared */
   auto cs_dist = cc->Encrypt(pk, ps_dist);
-  /* auto cs_dsqr = cc->Encrypt(pk, ps_dsqr); */
   auto cs_dsqr = cc->EvalSquare(cs_dist);
   auto cf_dist = cc->Encrypt(pk, pf_dist);
-  /* auto cf_dsqr = cc->Encrypt(pk, pf_dsqr); */
   auto cf_dsqr = cc->EvalSquare(cf_dist);
 
   auto cs_b1 = cc->Encrypt(pk, ps_b1);
