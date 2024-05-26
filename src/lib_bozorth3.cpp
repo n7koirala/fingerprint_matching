@@ -470,7 +470,6 @@ int bz_match(
 
       ss_dist[((k - 1) * window_length) + j - 1] =
           (float)ss[0]; /* subject distance */
-          (float)SQUARED(ss[0]); /* subject distance */
       ss_b1[((k - 1) * window_length) + j - 1] =
           (float)ss[1]; /* subject b1 */
       ss_b2[((k - 1) * window_length) + j - 1] =
@@ -486,7 +485,6 @@ int bz_match(
 
       ff_dist[((k - 1) * window_length) + j - 1] =
           (float)ff[0]; /* on file distance */
-          (float)SQUARED(ff[0]); /* on file distance */
       ff_b1[((k - 1) * window_length) + j - 1] =
           (float)ff[1]; /* on file b1 */
       ff_b2[((k - 1) * window_length) + j - 1] =
