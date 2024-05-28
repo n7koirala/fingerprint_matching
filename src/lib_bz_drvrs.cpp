@@ -97,9 +97,15 @@ int bozorth_probe_init(struct xyt_struct *pstruct) {
   bz_find(&msim, scolpt);
   /* fprintf(stdout, "msim: %d\n", msim); */
 
+#if false
   if (msim < FDD) /* Makes sure there are a reasonable number of edges (at least
                      500, if possible) to analyze in the Web */
     msim = (sim > FDD) ? FDD : sim;
+#endif
+
+#define MAX_PAIR_TABLE_SIZE 128
+  if (msim < MAX_PAIR_TABLE_SIZE)
+    msim = (sim > MAX_PAIR_TABLE_SIZE) ? MAX_PAIR_TABLE_SIZE : sim;
 
   /* fprintf(stdout, "msim: %d\n", msim); */
 
@@ -123,9 +129,16 @@ int bozorth_gallery_init(struct xyt_struct *gstruct) {
 
   bz_find(&mfim, fcolpt);
 
-  if (mfim < FDD) /* Makes sure there are a reasonable number of edges (at least
-                     500, if possible) to analyze in the Web */
-    mfim = (fim > FDD) ? FDD : fim;
+#if false
+if ( mfim < FDD )	/* Makes sure there are a reasonable number of edges (at least 500, if possible) to analyze in the Web */
+	mfim = ( fim > FDD ) ? FDD : fim;
+#endif
+
+#define MAX_PAIR_TABLE_SIZE 128
+  if (mfim < MAX_PAIR_TABLE_SIZE) /* Makes sure there are a reasonable number of
+                                     edges (at least 500, if possible) to
+                                     analyze in the Web */
+    mfim = (fim > MAX_PAIR_TABLE_SIZE) ? MAX_PAIR_TABLE_SIZE : fim;
 
   return mfim;
 }

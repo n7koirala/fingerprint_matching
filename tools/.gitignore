@@ -1,0 +1,10 @@
+# ignore the output pictures
+sim_output
+
+# ignore binaries and mak files
+nbis/bozorth3/bin
+nbis/mindtct/bin
+**/*/*.o
+**/*/p_rules.mak
+**/*/rules.mak
+install
