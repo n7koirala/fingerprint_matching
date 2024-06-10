@@ -2,7 +2,7 @@
 build
 obj
 bin
-
+test
 
 # ignore the output pictures
 tools/sim_output
