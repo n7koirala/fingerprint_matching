@@ -48,10 +48,20 @@ Welcome to the **Fingerprint Matching** project! This repository contains a comp
 To run the fingerprint matching application, use the following command in your terminal:
 
 ```bash
-./build/fingerprint_matching
+./build/fingerprint_matching [fingerprint file 1.xyt] [fingerprint file 2.xyt]
 ```
 
+For instance, try:
+```bash
+./fingerprint_matching ../test/6.xyt ../test/6.xyt
+```
+
+
 This will execute the main application, showcasing the fingerprint matching operations including encryption, matching, and decryption steps.
+
+
+### Generating .xyt files
+Look at `README.md` in the `tools` directory for more details.
 
 ## Configuration
 
