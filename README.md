@@ -56,6 +56,10 @@ For instance, try:
 ./fingerprint_matching ../test/6.xyt ../test/6.xyt
 ```
 
+To run matching against the whole database, create(move) the script file inside the build folder:
+```bash
+./build/run_fingerprint_matching.sh
+```
 
 This will execute the main application, showcasing the fingerprint matching operations including encryption, matching, and decryption steps.
 
